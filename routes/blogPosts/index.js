@@ -5,7 +5,7 @@ const express = require("express"),
 const { BlogPost } = require("../../database").schemas;
 
 router.get("/", async (req, res) => {
-    const posts = await BlogPost.find({});
+    const posts = await BlogPost.find({}).populate("author");
 
     res.send(posts);
 });
@@ -15,7 +15,7 @@ router.get("/:blog_id", async (req, res) => {
     if (!mongoose.isValidObjectId(blog_id))
         return res.status(400).send({ err: "Must be a valid ID" });
 
-    const post = await BlogPost.findById(req.params.blog_id);
+    const post = await BlogPost.findById(req.params.blog_id).populate("author");
 
     if (!post) return res.status(404).send({ err: "Blog post does not exist" });
 
@@ -61,19 +61,26 @@ router.put("/:blog_id", async (req, res) => {
 
     const newData = { title, cover, content, category };
 
-    const post = await BlogPost.findById(blog_id);
-
-    if (!post) return res.status(404).send({ err: "Blog post does not exist" });
-
-    post = { ...post, ...newData };
-
-    post.save((err, doc) => {
-        if (err)
-            return res.status(500).send({
-                err: "Database error",
-            });
-        res.send(doc);
-    });
+    BlogPost.findByIdAndUpdate(
+        blog_id,
+        {
+            $set: {
+                ...newData,
+            },
+        },
+        {
+            new: true, //return new doc
+        }
+    )
+        .then((doc) => {
+            res.send(doc);
+        })
+        .catch((err) => {
+            if (err)
+                return res.status(500).send({
+                    err: "Database error",
+                });
+        });
 });
 router.delete("/:blog_id", async (req, res) => {
     const { blog_id } = req.params;
