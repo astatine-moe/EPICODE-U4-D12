@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
 
     const count = await BlogPost.countDocuments({});
 
-    const posts = await BlogPost.find({})
+    let posts = await BlogPost.find({})
         .populate("author")
         .limit(perPage)
         .skip(perPage * page)
@@ -21,6 +21,14 @@ router.get("/", async (req, res) => {
             createdAt: -1,
         })
         .exec();
+    for (let i = 0; i < posts.length; i++) {
+        posts[i] = posts[i].toObject();
+        posts[i].comments = await Comment.find({
+            blog: posts[i]._id,
+        });
+    }
+    for (let post of posts) {
+    }
 
     res.send({
         posts,
