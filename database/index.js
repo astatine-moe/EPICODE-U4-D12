@@ -25,6 +25,7 @@ const getMongoose = () => {
 const schemas = {
     BlogPost: require("./models/BlogPost"),
     Author: require("./models/Author"),
+    Comment: require("./models/Comment"),
 };
 
 module.exports = {
