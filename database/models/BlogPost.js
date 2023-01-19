@@ -1,5 +1,12 @@
 const mongoose = require("mongoose");
 
+const Likes = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Author",
+    },
+});
+
 const schema = new mongoose.Schema({
     title: {
         type: String,
@@ -33,6 +40,7 @@ const schema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    likes: [Likes],
 });
 schema.methods = {};
 

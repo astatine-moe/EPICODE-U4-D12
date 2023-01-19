@@ -49,6 +49,25 @@ router.get("/:blog_id", async (req, res) => {
 
     res.send(post);
 });
+router.post("/:blog_id/like", async (req, res) => {
+    const { blog_id } = req.params;
+
+    if (!mongoose.isValidObjectId(blog_id))
+        return res.status(400).send({ err: "Must be a valid blog ID" });
+    const { author_id } = req.body;
+    if (!author_id)
+        return res.status(400).send({ err: "Must include author_id" });
+    if (!mongoose.isValidObjectId(author_id))
+        return res.status(400).send({ err: "Must be a valid author ID" });
+
+    await BlogPost.findByIdAndUpdate(blog_id, {
+        $addToSet: { user: author_id },
+    });
+
+    res.send({
+        message: "OK",
+    });
+});
 router.post("/", async (req, res) => {
     let { category, title, cover, author_id, content } = req.body;
 
